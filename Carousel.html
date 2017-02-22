@@ -1,0 +1,179 @@
+<!doctype html>  
+<html>  
+    <head>  
+        <title></title>  
+    </head>  
+    <style type="text/css">  
+        *{  
+            padding:0px;  
+            margin: 0px;  
+        }  
+        #box{  
+            width: 490px;  
+            height: 170px;  
+            overflow: hidden;  
+            position: relative;  
+            background-color: orange;  
+        }  
+        #box #mylist{  
+            position: absolute;  
+            width: 2450px;  
+            left: 0px;  
+            top: 0px;  
+            list-style-type: none;  
+        }  
+        #box ul li{  
+            float: left;  
+            width:490px;
+            overflow: hidden;
+        }  
+        #box ul li img{
+            width:100%;
+            height:auto;
+        }
+        ul#underNum{  
+            position: absolute;  
+            right: 10px;  
+            bottom: 10px;  
+            background-color: yellow;  
+            width: 150px;  
+            height: 30px;  
+            list-style-type: none;  
+        }  
+        ul#underNum li{  
+            text-align: center;  
+            width: 30px;  
+            height: 30px;  
+            line-height: 30px;  
+              
+        }  
+        ul#underNum li a{  
+            text-decoration: none;  
+        }  
+        .pre , .next {
+            position: absolute;
+            top:80px;
+            left:0px;
+            width:30px;
+            height:30px;
+            border:1px solid red;
+            background-color: #ddd;
+            z-index: 9;
+        }
+        .next {
+            left:460px;
+        }
+    </style>  
+    <body>  
+        <div id="box">  
+        <a href="javascript:;" class="pre"><</a>
+            <ul id="mylist">  
+                <li>1<a><img src="image/1_b.jpg"></a></li>  
+                <li>2<a><img src="image/5_b.jpg"></a></li> 
+                <li>3<a><img src="image/7_b.jpg"></a></li> 
+                <li>4<a><img src="image/4_b.jpg"></a></li> 
+                <li>5<a><img src="image/5_b.jpg"></a></li> 
+            </ul>  
+        <a href="javascript:;" class="next">></a>
+            <ul id="underNum">  
+                <li><a href="javascript:;">1</a></li>  
+                <li><a href="javascript:;">2</a></li>  
+                <li><a href="javascript:;">3</a></li>  
+                <li><a href="javascript:;">4</a></li>  
+                <li><a href="javascript:;">5</a></li>  
+            </ul>  
+        </div>  
+        <script type="text/javascript">  
+        // 轮播思路：
+        // 1、获取轮播的内容，修改轮播图片为  最后一张+整套轮播+整套轮播
+        // 2、获取ul的left 初始化为负的一张图片宽度（-490px）为的是让第一张图片显示
+        // 3、设置移动定时器，传入参数true为左移动false为右移动，如果left==0的时候，让left等于负的ul的宽度（一套轮播）-一张图片的宽度，为的是让他显示第一套轮播的最后一张，如果left=一套轮播+一张图片的宽度（第6张）让他的位置移动到第2张（既第一套轮播的第一张），如果left=一张图片的宽度，关闭定时器；
+        // 4，点击左右两个按钮或移入时，按下去以后先关闭定时器，手动开启移动事件，当鼠标移开的时候，重新开启定时器；
+        // 5、遍历按钮，获取当前按钮的下标，当点击相对应的按钮时关闭定时器，left移动到相对应的位置，且设置ul的left的值；
+            function $(selector) {
+                return document.querySelectorAll(selector);
+            }
+            var sudu = 0
+            var arr=[];
+            var ul = $('#mylist')[0];
+           
+            var liwidth= 490;
+            var lilength = $('#mylist li').length;
+            var ulwidth = liwidth*lilength*2;
+            var uw    = liwidth*lilength;
+            var apre  = $('.pre')[0];
+            var anext = $('.next')[0];
+            var last =ul.lastElementChild.innerHTML;
+            var index=0;
+            ul.style.width = ulwidth+liwidth + "px";
+            // ul.innerHTML+=ul.innerHTML;
+            ul.innerHTML="<li>"+last+"</li>"+ul.innerHTML+ul.innerHTML;
+            ul.style.left=-liwidth +"px";
+            // console.log(ul.style.left);
+            var left = ul.offsetLeft; 
+
+           
+            function move(dir,sudu) {
+                var timer=setInterval(function(){
+
+                    if(dir){
+                        // console.log(1)
+                        left+=49;
+                    }else{
+                        // console.log(2)
+                        left-=49;
+                    }
+
+                    if(left==0){
+                        left=-uw;
+                        // console.log(left)
+                    } 
+                    if(left%liwidth==0){
+                        clearInterval(timer);
+                      
+                        // console.log(index)
+                    }
+                    if(Math.abs(left) == uw+liwidth){
+                        left = -liwidth;
+                        
+                    }
+
+                     ul.style.left = left + "px";
+                    // console.log(left)
+                },sudu);
+            }
+                
+            
+        var aoto = setInterval(function() {move(false,20);},2000);
+           apre.onclick= function(){
+            clearInterval(aoto);
+            move(true,20);
+            
+           }
+           anext.onclick = function(){
+            clearInterval(aoto);
+            move(false,20);
+           }
+           ul.onmouseover=apre.onmouseover = anext.onmouseover=function() {
+            clearInterval(aoto);
+            aoto=undefined;
+                ul.onmouseout= apre.onmouseout= anext.onmouseout=function() {
+                    if(aoto==undefined){
+                        aoto = setInterval(function() {move(false,20);},2000);
+                    }
+                }
+           }
+
+           for(i=0;i<lilength;i++){
+            $('#underNum li')[i].index=i;
+            $('#underNum li')[i].onclick=function(){
+                clearInterval(aoto);
+                 left= -(this.index+1)*liwidth;
+                ul.style.left = left + "px";
+                // console.log(this.index)
+                }
+           }
+        </script>  
+        
+    </body>  
+</html>  
